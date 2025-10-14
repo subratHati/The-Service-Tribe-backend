@@ -28,10 +28,28 @@ const PORT = process.env.PORT || 5000;
 // If you deploy behind a proxy (Render, Railway, Nginx), keep this:
 app.set("trust proxy", 1); // ✅ helps rate-limit see real IP, sets secure cookies correctly in prod
 
+// Flexible CORS that reads ALLOWED_ORIGINS from env (comma separated).
+// It will accept requests from any origin listed there and allow credentials.
+const allowedOriginsRaw = process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = allowedOriginsRaw
+  .split(",")
+  .map(o => o.trim().replace(/\/$/, "")) // normalize & remove trailing slash
+  .filter(Boolean);
+
 app.use(cors({
-    origin : process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    const normalized = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(normalized)) {
+      return callback(null, true);
+    }
+    // otherwise block
+    return callback(new Error(`CORS policy: origin ${origin} not allowed`), false);
+  },
+  credentials: true,
 }));
+
 
 app.use(helmet());
 app.use(express.json());
