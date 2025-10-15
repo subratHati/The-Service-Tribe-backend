@@ -7,7 +7,6 @@ const {register,
     requestPasswordReset,
     resetPassword,
     login,
-    getProfile,
     currentUser,
     logout,
     googleCallback,
@@ -27,7 +26,6 @@ router.post("/resend-otp", otpLimiter, resendOtp);
 
 //Login, logout, fetch profile Routes.
 router.post("/login", loginLimiter, login);
-router.get("/profile", verifyToken, getProfile);
 router.get("/currentUser", verifyToken, currentUser);
 router.get("/logout", verifyToken, logout);
 router.post("/update-phoneNumber", verifyToken, updatePhoneNumber);

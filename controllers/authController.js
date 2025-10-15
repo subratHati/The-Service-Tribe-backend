@@ -311,13 +311,14 @@ exports.logout = async (req, res) => {
     }
 }
 
-exports.getProfile = async (req, res) => {
-    try {
-        res.json({ msg: "Profile fetched successfully!", user: req.user });
-    } catch (error) {
-        res.status(500).json({ msg: "Server error" });
-    }
-}
+// exports.getProfile = async (req, res) => {
+//     console.log("Current user is calling...");
+//     try {
+//         res.json({ msg: "Profile fetched successfully!", user: req.user });
+//     } catch (error) {
+//         res.status(500).json({ msg: "Server error" });
+//     }
+// }
 
 exports.currentUser = async (req, res) => {
     try {
