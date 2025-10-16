@@ -28,27 +28,46 @@ const PORT = process.env.PORT || 5000;
 // If you deploy behind a proxy (Render, Railway, Nginx), keep this:
 app.set("trust proxy", 1); // ✅ helps rate-limit see real IP, sets secure cookies correctly in prod
 
-// Flexible CORS that reads ALLOWED_ORIGINS from env (comma separated).
-// It will accept requests from any origin listed there and allow credentials.
-const allowedOriginsRaw = process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || "http://localhost:5173";
+import cors from "cors";
+
+// Parse allowed origins from environment
+const allowedOriginsRaw =
+  process.env.ALLOWED_ORIGINS ||
+  process.env.CLIENT_URL ||
+  "http://localhost:5173";
+
 const allowedOrigins = allowedOriginsRaw
   .split(",")
-  .map(o => o.trim().replace(/\/$/, "")) // normalize & remove trailing slash
+  .map(o =>
+    o
+      .trim()
+      .replace(/\/$/, "") // remove trailing slash
+      .replace(/^https?:\/\/www\./, "https://") // normalize www domains
+  )
   .filter(Boolean);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // allow requests with no origin (like mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    const normalized = origin.replace(/\/$/, "");
-    if (allowedOrigins.includes(normalized)) {
-      return callback(null, true);
-    }
-    // otherwise block
-    return callback(new Error(`CORS policy: origin ${origin} not allowed`), false);
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const normalized = origin
+        .trim()
+        .replace(/\/$/, "")
+        .replace(/^https?:\/\/www\./, "https://");
+
+      if (allowedOrigins.includes(normalized)) {
+        return callback(null, true);
+      }
+
+      console.warn(`🚫 CORS blocked: ${origin}`);
+      return callback(new Error(`CORS policy: Origin ${origin} not allowed.`), false);
+    },
+    credentials: true,
+  })
+);
+
 
 
 app.use(helmet());
