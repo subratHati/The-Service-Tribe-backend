@@ -28,8 +28,6 @@ const PORT = process.env.PORT || 5000;
 // If you deploy behind a proxy (Render, Railway, Nginx), keep this:
 app.set("trust proxy", 1); // ✅ helps rate-limit see real IP, sets secure cookies correctly in prod
 
-import cors from "cors";
-
 // Parse allowed origins from environment
 const allowedOriginsRaw =
   process.env.ALLOWED_ORIGINS ||
