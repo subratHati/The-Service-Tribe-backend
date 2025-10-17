@@ -77,8 +77,6 @@ exports.register = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
     try {
         const { email, otp } = req.body;
-        console.log("Email is : ", email);
-        console.log("otp is : ", otp);
         if (!otp) return res.status(400).json({ msg: "OTP is required" });
 
         const user = await User.findOne({ email });
