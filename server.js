@@ -10,6 +10,7 @@ const connectDB = require("./config/db");
 
 const {apiLimiter} = require("./middlewares/security");
 
+const net = require("net");
 
 const authRoutes = require("./routes/authRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
@@ -97,6 +98,52 @@ app.get("/", (req, res) => {
 });
 
 connectDB();
+
+// add this one-time debug route (e.g. in app.js or server.js)
+
+
+app.get("/_debug/smtp-tcp-check", async (req, res) => {
+  const host = process.env.SMTP_HOST || "smtp.gmail.com";
+  const ports = [587, 465];
+  const results = [];
+
+  for (const port of ports) {
+    results.push(
+      await new Promise((resolve) => {
+        const socket = new net.Socket();
+        const timeout = 7000;
+        let done = false;
+
+        socket.setTimeout(timeout);
+
+        socket.on("connect", () => {
+          done = true;
+          socket.destroy();
+          resolve({ port, ok: true, msg: "connected" });
+        });
+
+        socket.on("timeout", () => {
+          if (done) return;
+          done = true;
+          socket.destroy();
+          resolve({ port, ok: false, msg: "timeout" });
+        });
+
+        socket.on("error", (err) => {
+          if (done) return;
+          done = true;
+          socket.destroy();
+          resolve({ port, ok: false, msg: err.message });
+        });
+
+        socket.connect(port, host);
+      })
+    );
+  }
+
+  res.json({ host: process.env.SMTP_HOST || "smtp.gmail.com", results });
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
