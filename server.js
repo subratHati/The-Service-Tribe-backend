@@ -99,50 +99,24 @@ app.get("/", (req, res) => {
 
 connectDB();
 
-// add this one-time debug route (e.g. in app.js or server.js)
 
-
-app.get("/_debug/smtp-tcp-check", async (req, res) => {
-  const host = process.env.SMTP_HOST || "smtp.gmail.com";
-  const ports = [587, 465];
-  const results = [];
-
-  for (const port of ports) {
-    results.push(
-      await new Promise((resolve) => {
-        const socket = new net.Socket();
-        const timeout = 7000;
-        let done = false;
-
-        socket.setTimeout(timeout);
-
-        socket.on("connect", () => {
-          done = true;
-          socket.destroy();
-          resolve({ port, ok: true, msg: "connected" });
-        });
-
-        socket.on("timeout", () => {
-          if (done) return;
-          done = true;
-          socket.destroy();
-          resolve({ port, ok: false, msg: "timeout" });
-        });
-
-        socket.on("error", (err) => {
-          if (done) return;
-          done = true;
-          socket.destroy();
-          resolve({ port, ok: false, msg: err.message });
-        });
-
-        socket.connect(port, host);
-      })
+// ✅ Temporary test route for SendGrid email
+app.get("/_test-send-email", async (req, res) => {
+  const sendEmail = require("./utils/email"); // adjust path if needed
+  try {
+    await sendEmail(
+      "your-email@gmail.com", // change to your real email to test
+      "Test from SendGrid",
+      "This is a plain text test email",
+      "<b>This is a HTML test email</b>"
     );
+    res.send("✅ Email sent successfully via SendGrid!");
+  } catch (e) {
+    console.error("❌ SendGrid test error:", e);
+    res.status(500).send(String(e));
   }
-
-  res.json({ host: process.env.SMTP_HOST || "smtp.gmail.com", results });
 });
+
 
 
 app.listen(PORT, () => {
