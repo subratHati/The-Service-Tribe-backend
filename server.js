@@ -100,24 +100,6 @@ app.get("/", (req, res) => {
 connectDB();
 
 
-// ✅ Temporary test route for SendGrid email
-app.get("/_test-send-email", async (req, res) => {
-  const sendEmail = require("./utils/email"); // adjust path if needed
-  try {
-    await sendEmail(
-      "your-email@gmail.com", // change to your real email to test
-      "Test from SendGrid",
-      "This is a plain text test email",
-      "<b>This is a HTML test email</b>"
-    );
-    res.send("✅ Email sent successfully via SendGrid!");
-  } catch (e) {
-    console.error("❌ SendGrid test error:", e);
-    res.status(500).send(String(e));
-  }
-});
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
