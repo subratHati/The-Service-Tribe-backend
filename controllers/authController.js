@@ -85,7 +85,7 @@ exports.verifyEmail = async (req, res) => {
 
         if (new Date() > user.otpExpiry) {
             user.otp = null;
-            user.otpExpiry = null,
+            user.otpExpiry = null;
 
                 await user.save();
             return res.status(400).json({ msg: "OTP expired" });
@@ -106,7 +106,7 @@ exports.verifyEmail = async (req, res) => {
         return res.json({ msg: "Email verified", token, user: { id: user._id, email: user.email, name: user.name } });
     } catch (error) {
         console.error("verifyEmail error:", err);
-        return res.status(500).json({ msg: "Server error" });
+        return res.status(500).json({ msg: "Server error", error: error.message });
     }
 }
 
@@ -298,7 +298,7 @@ exports.logout = async (req, res) => {
         res.clearCookie("token", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "Lax",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             path: "/"
         });
 
