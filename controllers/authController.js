@@ -102,8 +102,8 @@ exports.verifyEmail = async (req, res) => {
         await user.save();
 
         // optional: auto-login
-        createSendToken(user, res);
-        return res.json({ msg: "Email verified", user: { id: user._id, email: user.email, name: user.name } });
+       const token = createSendToken(user, res);
+        return res.json({ msg: "Email verified", token, user: { id: user._id, email: user.email, name: user.name } });
     } catch (error) {
         console.error("verifyEmail error:", err);
         return res.status(500).json({ msg: "Server error" });
@@ -220,13 +220,13 @@ exports.resendOtp = async (req, res) => {
         await user.save();
 
         // Send OTP via email
-        const subject = "Password reset code";
-        const text = `Hi ${user.name},
-      Your password reset code is ${otpPlain}. It expires in ${OTP_EXPIRE_MIN} minutes.`;
+        const subject = "Resend verification code";
+        const text = `Hello ${user.name},
+      Your OTP is ${otpPlain}. It expires in ${OTP_EXPIRE_MIN} minutes.`;
 
         await sendEmail(email, subject, text, verifyEmailTemplate(user.name, otpPlain));
 
-        return res.json({ msg: "Password reset OTP sent" });
+        return res.json({ msg: "Resend verification code" });
 
     } catch (error) {
         console.error("Resend OTP error:", error);
